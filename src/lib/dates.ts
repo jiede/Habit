@@ -4,6 +4,7 @@ import {
   format,
   getISOWeek,
   getISOWeekYear,
+  parse,
   parseISO,
   startOfISOWeek,
 } from "date-fns";
@@ -27,6 +28,12 @@ export function weekKeyISO(d: Date): string {
   const y = getISOWeekYear(d);
   const w = getISOWeek(d);
   return `${y}-W${String(w).padStart(2, "0")}`;
+}
+
+export function dateFromWeekKey(weekKey: string): Date {
+  const m = /^(\d{4})-W(\d{2})$/.exec(weekKey);
+  if (!m) return new Date();
+  return parse(`${m[1]}-W${m[2]}-1`, "RRRR-'W'II-i", new Date());
 }
 
 export function formatWeekBanner(d: Date): {

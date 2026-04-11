@@ -5,6 +5,7 @@ import {
   weekDateKeysFor,
   weekKeyISO,
   formatWeekBanner,
+  dateFromWeekKey,
 } from "../dates";
 
 describe("toDateKey", () => {
@@ -43,5 +44,11 @@ describe("formatWeekBanner", () => {
     expect(b.weekKey).toMatch(/^2026-W\d{2}$/);
     expect(b.shortLabel).toMatch(/^wk\d{2}$/);
     expect(b.rangeZh).toMatch(/^\d{1,2}月\d{1,2}日[–-]\d{1,2}月\d{1,2}日$/);
+  });
+});
+
+describe("dateFromWeekKey", () => {
+  it("round-trips week key via Monday anchor", () => {
+    expect(weekKeyISO(dateFromWeekKey("2026-W15"))).toBe("2026-W15");
   });
 });
