@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { db } from "../db/database";
 import type { DailyEntry, Habit } from "../db/types";
+import { useToast } from "../hooks/useToast";
 import { debounce } from "../lib/debounce";
 import { parseDateKeyLocal, toDateKey } from "../lib/dates";
 
@@ -12,6 +13,7 @@ function addDaysKey(key: string, delta: number): string {
 }
 
 export default function TodayPage() {
+  const { show } = useToast();
   const [params, setParams] = useSearchParams();
   const initial = params.get("date") ?? toDateKey(new Date());
   const [dateKey, setDateKey] = useState(initial);
@@ -47,12 +49,12 @@ export default function TodayPage() {
         void (async () => {
           try {
             await db.dailyEntries.put({ ...next, updatedAt: Date.now() });
-          } catch (e) {
-            console.error(e);
+          } catch {
+            show("保存失败，请稍后重试");
           }
         })();
       }, 400),
-    [],
+    [show],
   );
 
   const updateEntry = useCallback(

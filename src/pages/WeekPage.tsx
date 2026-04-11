@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { db } from "../db/database";
 import type { DailyEntry, Habit, WeeklyEntry } from "../db/types";
 import { summarizeNumericWeek, summarizeToggleWeek } from "../lib/aggregate";
+import { useToast } from "../hooks/useToast";
 import { debounce } from "../lib/debounce";
 import {
   dateFromWeekKey,
@@ -12,6 +13,7 @@ import {
 } from "../lib/dates";
 
 export default function WeekPage() {
+  const { show } = useToast();
   const { weekKey: weekKeyParam } = useParams();
   const weekKey = weekKeyParam ?? weekKeyISO(new Date());
   const anchor = dateFromWeekKey(weekKey);
@@ -72,12 +74,12 @@ export default function WeekPage() {
         void (async () => {
           try {
             await db.weeklyEntries.put({ ...row, updatedAt: Date.now() });
-          } catch (e) {
-            console.error(e);
+          } catch {
+            show("保存失败，请稍后重试");
           }
         })();
       }, 400),
-    [],
+    [show],
   );
 
   const updateWeekly = useCallback(
