@@ -12,39 +12,41 @@
 
 ## File map (repo root `sdd-demo/`)
 
-| Path | Responsibility |
-|------|----------------|
-| `package.json` | Scripts: `dev`, `build`, `preview`, `test`, `test:run` |
-| `vite.config.ts` | React plugin, Vitest project config |
-| `tsconfig.json`, `tsconfig.node.json` | TS strict |
-| `index.html` | Mount root |
-| `src/main.tsx` | `createRoot`, `BrowserRouter` |
-| `src/index.css` | Minimal global styles (layout, nav, forms) |
-| `src/App.tsx` | Routes + nav shell |
-| `src/db/types.ts` | `Habit`, `DailyEntry`, `WeeklyEntry` types |
-| `src/db/database.ts` | Dexie subclass `LifeTrackerDB`, version 1 |
-| `src/lib/dates.ts` | `toDateKey`, week keys, labels (`wk02` + 中文日期范围) |
-| `src/lib/aggregate.ts` | Per-habit weekly rollups |
-| `src/lib/debounce.ts` | Shared debounce helper |
-| `src/lib/__tests__/dates.test.ts` | Week + label tests |
-| `src/lib/__tests__/aggregate.test.ts` | Aggregation tests |
-| `src/hooks/useToast.tsx` | Tiny context for non-blocking error toasts |
-| `src/pages/TodayPage.tsx` | Date navigation + habit form + journal fields |
-| `src/pages/WeekPage.tsx` | Aggregates + weekly manual fields |
-| `src/pages/StatsPage.tsx` | Week list + links |
-| `src/pages/HabitsPage.tsx` | CRUD + archive + reorder |
-| `src/components/NavBar.tsx` | Links: 今日 / 本周 / 统计 / 习惯 |
-| `README.md` | Dev/build + spec link |
+
+| Path                                  | Responsibility                                         |
+| ------------------------------------- | ------------------------------------------------------ |
+| `package.json`                        | Scripts: `dev`, `build`, `preview`, `test`, `test:run` |
+| `vite.config.ts`                      | React plugin, Vitest project config                    |
+| `tsconfig.json`, `tsconfig.node.json` | TS strict                                              |
+| `index.html`                          | Mount root                                             |
+| `src/main.tsx`                        | `createRoot`, `BrowserRouter`                          |
+| `src/index.css`                       | Minimal global styles (layout, nav, forms)             |
+| `src/App.tsx`                         | Routes + nav shell                                     |
+| `src/db/types.ts`                     | `Habit`, `DailyEntry`, `WeeklyEntry` types             |
+| `src/db/database.ts`                  | Dexie subclass `LifeTrackerDB`, version 1              |
+| `src/lib/dates.ts`                    | `toDateKey`, week keys, labels (`wk02` + 中文日期范围)       |
+| `src/lib/aggregate.ts`                | Per-habit weekly rollups                               |
+| `src/lib/debounce.ts`                 | Shared debounce helper                                 |
+| `src/lib/__tests__/dates.test.ts`     | Week + label tests                                     |
+| `src/lib/__tests__/aggregate.test.ts` | Aggregation tests                                      |
+| `src/hooks/useToast.tsx`              | Tiny context for non-blocking error toasts             |
+| `src/pages/TodayPage.tsx`             | Date navigation + habit form + journal fields          |
+| `src/pages/WeekPage.tsx`              | Aggregates + weekly manual fields                      |
+| `src/pages/StatsPage.tsx`             | Week list + links                                      |
+| `src/pages/HabitsPage.tsx`            | CRUD + archive + reorder                               |
+| `src/components/NavBar.tsx`           | Links: 今日 / 本周 / 统计 / 习惯                               |
+| `README.md`                           | Dev/build + spec link                                  |
+
 
 ---
 
 ### Task 1: Project scaffold
 
 **Files:**
+
 - Create: `package.json`, `vite.config.ts`, `tsconfig.json`, `tsconfig.node.json`, `index.html`
 - Create: `src/main.tsx`, `src/App.tsx`, `src/index.css`
-
-- [ ] **Step 1: Write `package.json`**
+- **Step 1: Write `package.json`**
 
 ```json
 {
@@ -78,7 +80,7 @@
 }
 ```
 
-- [ ] **Step 2: Write `tsconfig.json`**
+- **Step 2: Write `tsconfig.json`**
 
 ```json
 {
@@ -105,7 +107,7 @@
 }
 ```
 
-- [ ] **Step 3: Write `tsconfig.node.json`**
+- **Step 3: Write `tsconfig.node.json`**
 
 ```json
 {
@@ -120,7 +122,7 @@
 }
 ```
 
-- [ ] **Step 4: Write `vite.config.ts`**
+- **Step 4: Write `vite.config.ts`**
 
 ```typescript
 /// <reference types="vitest/config" />
@@ -137,7 +139,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 5: Write `index.html`**
+- **Step 5: Write `index.html`**
 
 ```html
 <!doctype html>
@@ -154,7 +156,7 @@ export default defineConfig({
 </html>
 ```
 
-- [ ] **Step 6: Write `src/main.tsx`**
+- **Step 6: Write `src/main.tsx`**
 
 ```typescript
 import { StrictMode } from "react";
@@ -172,7 +174,7 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-- [ ] **Step 7: Write placeholder `src/App.tsx`**
+- **Step 7: Write placeholder `src/App.tsx`**
 
 ```typescript
 export default function App() {
@@ -180,7 +182,7 @@ export default function App() {
 }
 ```
 
-- [ ] **Step 8: Write minimal `src/index.css`**
+- **Step 8: Write minimal `src/index.css`**
 
 ```css
 * {
@@ -193,7 +195,7 @@ body {
 }
 ```
 
-- [ ] **Step 9: Install and verify build**
+- **Step 9: Install and verify build**
 
 Run:
 
@@ -211,7 +213,7 @@ npm run build
 
 Expected: Vite produces `dist/` with no errors.
 
-- [ ] **Step 10: Commit**
+- **Step 10: Commit**
 
 ```bash
 git add package.json package-lock.json vite.config.ts tsconfig.json tsconfig.node.json index.html src/main.tsx src/App.tsx src/index.css
@@ -223,10 +225,10 @@ git commit -m "chore: vite react ts scaffold"
 ### Task 2: Date + week utilities (TDD)
 
 **Files:**
+
 - Create: `src/lib/dates.ts`
 - Create: `src/lib/__tests__/dates.test.ts`
-
-- [ ] **Step 1: Write failing tests `src/lib/__tests__/dates.test.ts`**
+- **Step 1: Write failing tests `src/lib/__tests__/dates.test.ts`**
 
 ```typescript
 import { describe, it, expect } from "vitest";
@@ -278,7 +280,7 @@ describe("formatWeekBanner", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL**
+- **Step 2: Run tests — expect FAIL**
 
 Run:
 
@@ -288,7 +290,7 @@ cd /Users/jamie/Desktop/cursor/sdd-demo && npm run test:run -- src/lib/__tests__
 
 Expected: FAIL (module not found or exports missing).
 
-- [ ] **Step 3: Implement `src/lib/dates.ts`**
+- **Step 3: Implement `src/lib/dates.ts`**
 
 ```typescript
 import {
@@ -338,7 +340,7 @@ export function formatWeekBanner(d: Date): {
 }
 ```
 
-- [ ] **Step 4: Run tests — expect PASS**
+- **Step 4: Run tests — expect PASS**
 
 Run:
 
@@ -348,7 +350,7 @@ npm run test:run -- src/lib/__tests__/dates.test.ts
 
 Expected: all tests PASS.
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/lib/dates.ts src/lib/__tests__/dates.test.ts
@@ -360,10 +362,10 @@ git commit -m "feat: iso week helpers and zh banner"
 ### Task 3: Weekly aggregation (TDD)
 
 **Files:**
+
 - Create: `src/lib/aggregate.ts`
 - Create: `src/lib/__tests__/aggregate.test.ts`
-
-- [ ] **Step 1: Write failing tests `src/lib/__tests__/aggregate.test.ts`**
+- **Step 1: Write failing tests `src/lib/__tests__/aggregate.test.ts`**
 
 ```typescript
 import { describe, it, expect } from "vitest";
@@ -408,7 +410,7 @@ describe("summarizeNumericWeek", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL**
+- **Step 2: Run tests — expect FAIL**
 
 Run:
 
@@ -418,7 +420,7 @@ npm run test:run -- src/lib/__tests__/aggregate.test.ts
 
 Expected: FAIL.
 
-- [ ] **Step 3: Implement `src/lib/aggregate.ts`**
+- **Step 3: Implement `src/lib/aggregate.ts`**
 
 ```typescript
 export type ToggleWeekSummary = {
@@ -468,7 +470,7 @@ export function summarizeNumericWeek(
 }
 ```
 
-- [ ] **Step 4: Run tests — expect PASS**
+- **Step 4: Run tests — expect PASS**
 
 Run:
 
@@ -478,7 +480,7 @@ npm run test:run -- src/lib/__tests__/aggregate.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/lib/aggregate.ts src/lib/__tests__/aggregate.test.ts
@@ -490,10 +492,10 @@ git commit -m "feat: weekly aggregation helpers"
 ### Task 4: Dexie schema + types
 
 **Files:**
+
 - Create: `src/db/types.ts`
 - Create: `src/db/database.ts`
-
-- [ ] **Step 1: Add `src/db/types.ts`**
+- **Step 1: Add `src/db/types.ts`**
 
 ```typescript
 export type HabitType = "toggle" | "numeric";
@@ -527,7 +529,7 @@ export type WeeklyEntry = {
 };
 ```
 
-- [ ] **Step 2: Add `src/db/database.ts`**
+- **Step 2: Add `src/db/database.ts`**
 
 ```typescript
 import Dexie, { type Table } from "dexie";
@@ -551,7 +553,7 @@ export class LifeTrackerDB extends Dexie {
 export const db = new LifeTrackerDB();
 ```
 
-- [ ] **Step 3: Wire smoke import in `src/main.tsx`**
+- **Step 3: Wire smoke import in `src/main.tsx`**
 
 Add after CSS import:
 
@@ -563,7 +565,7 @@ void db.open().catch((e) => {
 });
 ```
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/db/types.ts src/db/database.ts src/main.tsx
@@ -575,11 +577,11 @@ git commit -m "feat: dexie schema v1"
 ### Task 5: Router shell + navigation
 
 **Files:**
+
 - Modify: `src/App.tsx`
 - Create: `src/components/NavBar.tsx`
 - Create: `src/pages/TodayPage.tsx`, `WeekPage.tsx`, `StatsPage.tsx`, `HabitsPage.tsx` (stubs)
-
-- [ ] **Step 1: Create stubs**
+- **Step 1: Create stubs**
 
 `src/pages/TodayPage.tsx`:
 
@@ -621,7 +623,7 @@ export default function HabitsPage() {
 }
 ```
 
-- [ ] **Step 2: Create `src/components/NavBar.tsx`**
+- **Step 2: Create `src/components/NavBar.tsx`**
 
 ```typescript
 import { NavLink } from "react-router-dom";
@@ -651,7 +653,7 @@ export default function NavBar() {
 }
 ```
 
-- [ ] **Step 3: Replace `src/App.tsx`**
+- **Step 3: Replace `src/App.tsx`**
 
 ```typescript
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -685,11 +687,11 @@ export default function App() {
 }
 ```
 
-- [ ] **Step 4: Manual check**
+- **Step 4: Manual check**
 
 Run `npm run dev`, open `/`, `/week`, `/stats`, `/habits`. Expect nav works and `/week` redirects to `/week/2026-Wxx`.
 
-- [ ] **Step 5: Commit**
+- **Step 5: Commit**
 
 ```bash
 git add src/App.tsx src/components/NavBar.tsx src/pages/*.tsx
@@ -701,9 +703,9 @@ git commit -m "feat: router shell and nav"
 ### Task 6: Habits management page
 
 **Files:**
-- Modify: `src/pages/HabitsPage.tsx`
 
-- [ ] **Step 1: Implement list + add + archive + reorder**
+- Modify: `src/pages/HabitsPage.tsx`
+- **Step 1: Implement list + add + archive + reorder**
 
 Use `crypto.randomUUID()` for ids. New habit: `sortOrder = max+1`, `archivedAt: null`, `createdAt: Date.now()`.
 
@@ -713,11 +715,11 @@ Reorder: 「上移」「下移」 swaps `sortOrder` with neighbor (only among no
 
 All mutations `await db.habits.put(...)`.
 
-- [ ] **Step 2: Manual test**
+- **Step 2: Manual test**
 
 Create toggle + numeric habits, archive one, refresh — data persists.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add src/pages/HabitsPage.tsx
@@ -855,10 +857,10 @@ export default function HabitsPage() {
 ### Task 7: Today page (day editor)
 
 **Files:**
+
 - Create: `src/lib/debounce.ts`
 - Modify: `src/pages/TodayPage.tsx`
-
-- [ ] **Step 1: Add `src/lib/debounce.ts`**
+- **Step 1: Add `src/lib/debounce.ts`**
 
 ```typescript
 export function debounce<T extends (...args: never[]) => void>(fn: T, ms: number) {
@@ -870,7 +872,7 @@ export function debounce<T extends (...args: never[]) => void>(fn: T, ms: number
 }
 ```
 
-- [ ] **Step 2: Implement `TodayPage`**
+- **Step 2: Implement `TodayPage`**
 
 Behavior:
 
@@ -882,12 +884,11 @@ Behavior:
 - Numeric: `<input type="number">` — empty input means `null`; `0` is valid stored as number.
 - `todayReview` / `tomorrowPlan` textareas.
 - `debounce` 400ms on any change → `db.dailyEntries.put({...})` wrapped in try/catch; on failure call toast (Task 9) or `console.error` until toast exists.
-
-- [ ] **Step 3: Manual test**
+- **Step 3: Manual test**
 
 Change fields, refresh — values remain.
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/lib/debounce.ts src/pages/TodayPage.tsx
@@ -1078,9 +1079,9 @@ Fix "今天" button: should set to actual today.
 ### Task 8: Week page (aggregates + weekly fields)
 
 **Files:**
-- Modify: `src/pages/WeekPage.tsx`
 
-- [ ] **Step 1: Add `dateFromWeekKey` + round-trip test**
+- Modify: `src/pages/WeekPage.tsx`
+- **Step 1: Add `dateFromWeekKey` + round-trip test**
 
 Append to `src/lib/dates.ts` (merge `parse` into the existing `date-fns` import; do not add a second `date-fns` import line):
 
@@ -1102,7 +1103,7 @@ describe("dateFromWeekKey", () => {
 });
 ```
 
-- [ ] **Step 2: Implement week view**
+- **Step 2: Implement week view**
 
 Load `weekDateKeysFor(anchor)`, all `dailyEntries` in keys, all `habits` (including archived for display in summary — show name from habit row; if missing id, show「未知习惯」).
 
@@ -1112,13 +1113,13 @@ Weekly manual fields: load `WeeklyEntry` by `weekKey`; debounced save `score` as
 
 Show banner via `formatWeekBanner(anchor)`.
 
-- [ ] **Step 3: Run tests**
+- **Step 3: Run tests**
 
 ```bash
 npm run test:run
 ```
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add src/lib/dates.ts src/lib/__tests__/dates.test.ts src/pages/WeekPage.tsx
@@ -1298,22 +1299,22 @@ export default function WeekPage() {
 ### Task 9: Stats page
 
 **Files:**
-- Modify: `src/pages/StatsPage.tsx`
 
-- [ ] **Step 1: List weeks**
+- Modify: `src/pages/StatsPage.tsx`
+- **Step 1: List weeks**
 
 Query `db.weeklyEntries` orderBy `weekKey` descending. For each row, compute banner using `dateFromWeekKey(row.weekKey)` + `formatWeekBanner`.
 
 Also include weeks that have daily data but no weekly row: optional YAGNI for MVP — **spec says stats show weekly score**; skip orphan weeks or derive week keys from distinct daily entries. Minimal: **only list `weeklyEntries`** plus always show link 「当前周」.
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add src/pages/StatsPage.tsx
 git commit -m "feat: stats week list"
 ```
 
-**`StatsPage.tsx` reference:**
+`**StatsPage.tsx` reference:**
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -1359,11 +1360,11 @@ export default function StatsPage() {
 ### Task 10: Toasts for IndexedDB errors
 
 **Files:**
+
 - Create: `src/hooks/useToast.tsx`
 - Modify: `src/main.tsx` (provider)
 - Modify: `TodayPage.tsx`, `WeekPage.tsx` (use toast on catch)
-
-- [ ] **Step 1: Implement simple context**
+- **Step 1: Implement simple context**
 
 ```typescript
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
@@ -1412,7 +1413,7 @@ Wrap `<App />` with `ToastProvider` inside `BrowserRouter`.
 
 Replace `console.error` in persist catch with `show('保存失败，请稍后重试')`.
 
-- [ ] **Step 2: Commit**
+- **Step 2: Commit**
 
 ```bash
 git add src/hooks/useToast.tsx src/main.tsx src/pages/TodayPage.tsx src/pages/WeekPage.tsx
@@ -1424,18 +1425,17 @@ git commit -m "feat: toast on persistence errors"
 ### Task 11: README + polish
 
 **Files:**
+
 - Create: `README.md`
 - Modify: `src/index.css` (optional spacing)
-
-- [ ] **Step 1: README**
+- **Step 1: README**
 
 Document:
 
 - `npm install`, `npm run dev`, `npm run test:run`, `npm run build`
 - Link to spec `docs/superpowers/specs/2026-04-11-daily-life-tracker-design.md`
 - Note: data local-only, same browser profile
-
-- [ ] **Step 2: Final verification**
+- **Step 2: Final verification**
 
 Run:
 
@@ -1446,7 +1446,7 @@ npm run build
 
 Expected: tests green, `dist/` produced.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add README.md
@@ -1457,17 +1457,19 @@ git commit -m "docs: readme for daily tracker"
 
 ## Spec coverage checklist (self-review)
 
-| Spec section | Tasks |
-|--------------|-------|
-| SPA + IndexedDB | Tasks 1, 4 |
-| 周一至周日 + `wk` + ISO key | Task 2, 8 |
-| 习惯类型 + 归档 | Task 6 |
-| 日记录 + 防抖 | Task 7 |
-| 周汇总规则 | Tasks 3, 8 |
-| 周总分与文字 | Task 8 |
-| 统计列表 | Task 9 |
-| 错误提示 | Task 10 |
-| 测试 | Tasks 2–3, 8 `dateFromWeekKey` test |
+
+| Spec section           | Tasks                               |
+| ---------------------- | ----------------------------------- |
+| SPA + IndexedDB        | Tasks 1, 4                          |
+| 周一至周日 + `wk` + ISO key | Task 2, 8                           |
+| 习惯类型 + 归档              | Task 6                              |
+| 日记录 + 防抖               | Task 7                              |
+| 周汇总规则                  | Tasks 3, 8                          |
+| 周总分与文字                 | Task 8                              |
+| 统计列表                   | Task 9                              |
+| 错误提示                   | Task 10                             |
+| 测试                     | Tasks 2–3, 8 `dateFromWeekKey` test |
+
 
 **Placeholder scan:** No TBD/TODO left in steps; Task 6 Step 3 was replaced by full file.
 

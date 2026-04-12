@@ -30,7 +30,8 @@ export default function HabitsPage() {
   async function addHabit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    const max = (await db.habits.max("sortOrder")) ?? 0;
+    const last = await db.habits.orderBy("sortOrder").last();
+    const max = last?.sortOrder ?? 0;
     const habit: Habit = {
       id: crypto.randomUUID(),
       name: name.trim(),

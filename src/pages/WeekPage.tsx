@@ -117,10 +117,13 @@ export default function WeekPage() {
               const v = dayMap.get(k)?.habitValues[id];
               return typeof v === "number" ? v : null;
             });
+            const unit = h?.unit?.trim();
+            const u = unit ? ` ${unit}` : "";
             return (
               <li key={id}>
-                <strong>{label}</strong>：合计 {s.sum}，{s.daysWithValue} 天有记录
-                {s.average !== undefined ? `，日均 ${s.average.toFixed(2)}` : ""}
+                <strong>{label}</strong>：合计 {s.sum}
+                {u}，{s.daysWithValue} 天有记录
+                {s.average !== undefined ? `，日均 ${s.average.toFixed(2)}${u}` : ""}
               </li>
             );
           }
