@@ -1,14 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { parseCookie, buildSessionCookie } from "../../../functions/_shared/auth";
+import { describe, expect, it } from "vitest";
+import { buildSessionCookie, parseCookie } from "../../../functions/_shared/auth";
 
-describe("parseCookie", () => {
-  it('reads session token from "Cookie" header string', () => {
+describe("auth cookie helpers", () => {
+  it("parseCookie extracts `session`", () => {
     expect(parseCookie("a=1; session=abc").session).toBe("abc");
   });
-});
 
-describe("buildSessionCookie", () => {
-  it("builds session cookie with httpOnly attributes", () => {
+  it("buildSessionCookie includes HttpOnly and session token", () => {
     const cookie = buildSessionCookie("token", 3600);
     expect(cookie).toContain("HttpOnly");
     expect(cookie).toContain("session=token");

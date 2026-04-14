@@ -1,52 +1,38 @@
-const PASSWORD_ITERATIONS = 100_000;
-const SALT_BYTES = 16;
+const HASH_ITERATIONS = 210_000;
 const HASH_BYTES = 32;
+const SALT_BYTES = 16;
 const SESSION_COOKIE_NAME = "session";
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 8;
-const MAX_PASSWORD_LENGTH = 256;
 
-function toBase64Url(bytes: Uint8Array): string {
-  let raw = "";
-  for (const byte of bytes) raw += String.fromCharCode(byte);
-  const b64 =
-    typeof btoa === "function"
-      ? btoa(raw)
-      : Buffer.from(bytes).toString("base64");
-  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+const encoder = new TextEncoder();
+
+function toHex(bytes: Uint8Array): string {
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function fromBase64Url(value: string): Uint8Array {
-  const b64 = value.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
-  const raw =
-    typeof atob === "function"
-      ? atob(padded)
-      : Buffer.from(padded, "base64").toString("binary");
-  const out = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+function fromHex(hex: string): Uint8Array {
+  if (hex.length % 2 !== 0 || /[^0-9a-f]/i.test(hex)) {
+    throw new Error("Invalid hex value");
+  }
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    out[i / 2] = Number.parseInt(hex.slice(i, i + 2), 16);
+  }
   return out;
 }
 
-function secureEqual(a: Uint8Array, b: Uint8Array): boolean {
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
   if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
-  return diff === 0;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a[i] ^ b[i];
+  }
+  return result === 0;
 }
 
-async function derivePasswordHash(
-  password: string,
-  salt: Uint8Array,
-  iterations: number
-): Promise<Uint8Array> {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(password),
-    "PBKDF2",
-    false,
-    ["deriveBits"]
-  );
+async function pbkdf2(password: string, salt: Uint8Array, iterations: number): Promise<Uint8Array> {
+  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, [
+    "deriveBits",
+  ]);
   const bits = await crypto.subtle.deriveBits(
     { name: "PBKDF2", hash: "SHA-256", salt, iterations },
     key,
@@ -57,80 +43,56 @@ async function derivePasswordHash(
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
-  const hash = await derivePasswordHash(password, salt, PASSWORD_ITERATIONS);
-  return `pbkdf2$${PASSWORD_ITERATIONS}$${toBase64Url(salt)}$${toBase64Url(hash)}`;
+  const digest = await pbkdf2(password, salt, HASH_ITERATIONS);
+  return `pbkdf2$${HASH_ITERATIONS}$${toHex(salt)}$${toHex(digest)}`;
 }
 
-export async function verifyPassword(
-  password: string,
-  encodedHash: string
-): Promise<boolean> {
-  const [algo, iterStr, saltStr, hashStr] = encodedHash.split("$");
-  if (algo !== "pbkdf2" || !iterStr || !saltStr || !hashStr) return false;
-  const iterations = Number(iterStr);
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  const [algo, iterationText, saltHex, digestHex] = hash.split("$");
+  if (algo !== "pbkdf2" || !iterationText || !saltHex || !digestHex) return false;
+
+  const iterations = Number(iterationText);
   if (!Number.isInteger(iterations) || iterations <= 0) return false;
-  const salt = fromBase64Url(saltStr);
-  const expected = fromBase64Url(hashStr);
-  const actual = await derivePasswordHash(password, salt, iterations);
-  return secureEqual(actual, expected);
+
+  try {
+    const salt = fromHex(saltHex);
+    const expected = fromHex(digestHex);
+    const actual = await pbkdf2(password, salt, iterations);
+    return timingSafeEqual(actual, expected);
+  } catch {
+    return false;
+  }
 }
 
 export function newSessionToken(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
-    ""
-  );
+  return toHex(bytes);
 }
 
-export function parseCookie(cookieHeader: string | null | undefined): Record<string, string> {
+export function parseCookie(cookieHeader: string | null): Record<string, string> {
   if (!cookieHeader) return {};
-  return cookieHeader
-    .split(";")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .reduce<Record<string, string>>((acc, part) => {
-      const sep = part.indexOf("=");
-      if (sep <= 0) return acc;
-      const key = decodeURIComponent(part.slice(0, sep).trim());
-      const value = decodeURIComponent(part.slice(sep + 1).trim());
-      acc[key] = value;
-      return acc;
-    }, {});
+  const parsed: Record<string, string> = {};
+
+  for (const segment of cookieHeader.split(";")) {
+    const item = segment.trim();
+    if (!item) continue;
+
+    const eqIndex = item.indexOf("=");
+    if (eqIndex <= 0) continue;
+
+    const key = decodeURIComponent(item.slice(0, eqIndex).trim());
+    const value = decodeURIComponent(item.slice(eqIndex + 1).trim());
+    parsed[key] = value;
+  }
+
+  return parsed;
 }
 
 export function buildSessionCookie(token: string, maxAgeSec: number): string {
-  const value = encodeURIComponent(token);
-  return `${SESSION_COOKIE_NAME}=${value}; Max-Age=${Math.max(
-    0,
-    Math.floor(maxAgeSec)
-  )}; HttpOnly; Path=/; SameSite=Lax`;
+  const safeAge = Math.max(0, Math.floor(maxAgeSec));
+  return `${SESSION_COOKIE_NAME}=${encodeURIComponent(token)}; Max-Age=${safeAge}; HttpOnly; Path=/; SameSite=Lax; Secure`;
 }
 
 export function clearSessionCookie(): string {
-  return `${SESSION_COOKIE_NAME}=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/; SameSite=Lax`;
-}
-
-export function getSessionCookieName(): string {
-  return SESSION_COOKIE_NAME;
-}
-
-export function parseSessionToken(cookieHeader: string | null | undefined): string | null {
-  const token = parseCookie(cookieHeader)[SESSION_COOKIE_NAME];
-  return token || null;
-}
-
-export function normalizeEmail(email: string): string {
-  return email.trim().toLowerCase();
-}
-
-export function isValidEmail(email: string): boolean {
-  return EMAIL_PATTERN.test(normalizeEmail(email));
-}
-
-export function isValidPassword(password: string): boolean {
-  return (
-    typeof password === "string" &&
-    password.length >= MIN_PASSWORD_LENGTH &&
-    password.length <= MAX_PASSWORD_LENGTH
-  );
+  return `${SESSION_COOKIE_NAME}=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/; SameSite=Lax; Secure`;
 }
