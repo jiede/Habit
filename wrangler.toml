@@ -1,0 +1,8 @@
+name = "habit"
+compatibility_date = "2026-04-14"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "habit-db"
+database_id = "__SET_IN_CLOUDFLARE__"

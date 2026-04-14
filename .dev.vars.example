@@ -1,0 +1,2 @@
+SESSION_SECRET=replace_me
+COOKIE_DOMAIN=localhost
