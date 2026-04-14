@@ -1,4 +1,4 @@
-const HASH_ALGO = "pbkdf2-sha256";
+const HASH_PREFIX = "pbkdf2";
 const HASH_ITERATIONS = 210_000;
 const HASH_BYTES = 32;
 const SALT_BYTES = 16;
@@ -8,19 +8,20 @@ const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 256;
 const encoder = new TextEncoder();
 
-function toHex(bytes: Uint8Array): string {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+/** Base64url without padding (Web Crypto–friendly, no Node Buffer). */
+function toBase64Url(bytes: Uint8Array): string {
+  let bin = "";
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
-function fromHex(hex: string): Uint8Array {
-  if (hex.length % 2 !== 0 || /[^0-9a-f]/i.test(hex)) {
-    throw new Error("Invalid hex input");
-  }
-
-  const out = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    out[i / 2] = Number.parseInt(hex.slice(i, i + 2), 16);
-  }
+function fromBase64Url(s: string): Uint8Array {
+  let b64 = s.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = b64.length % 4;
+  if (pad) b64 += "=".repeat(4 - pad);
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
 
@@ -50,19 +51,19 @@ async function derivePasswordDigest(
 export async function hashPassword(password: string): Promise<string> {
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
   const digest = await derivePasswordDigest(password, salt, HASH_ITERATIONS);
-  return `${HASH_ALGO}$${HASH_ITERATIONS}$${toHex(salt)}$${toHex(digest)}`;
+  return `${HASH_PREFIX}$${HASH_ITERATIONS}$${toBase64Url(salt)}$${toBase64Url(digest)}`;
 }
 
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const [algo, roundsRaw, saltHex, digestHex] = hash.split("$");
-  if (algo !== HASH_ALGO || !roundsRaw || !saltHex || !digestHex) return false;
+  const [algo, roundsRaw, saltB64, digestB64] = hash.split("$");
+  if (algo !== HASH_PREFIX || !roundsRaw || !saltB64 || !digestB64) return false;
 
   const rounds = Number.parseInt(roundsRaw, 10);
   if (!Number.isInteger(rounds) || rounds <= 0) return false;
 
   try {
-    const salt = fromHex(saltHex);
-    const expected = fromHex(digestHex);
+    const salt = fromBase64Url(saltB64);
+    const expected = fromBase64Url(digestB64);
     const actual = await derivePasswordDigest(password, salt, rounds);
     return timingSafeEqual(actual, expected);
   } catch {
@@ -71,7 +72,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export function newSessionToken(): string {
-  return toHex(crypto.getRandomValues(new Uint8Array(32)));
+  return toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
 }
 
 export function parseCookie(cookieHeader: string | null): Record<string, string> {
@@ -93,11 +94,11 @@ export function parseCookie(cookieHeader: string | null): Record<string, string>
 
 export function buildSessionCookie(token: string, maxAgeSec: number): string {
   const safeMaxAge = Math.max(0, Math.floor(maxAgeSec));
-  return `${SESSION_COOKIE_NAME}=${encodeURIComponent(token)}; Max-Age=${safeMaxAge}; Path=/; HttpOnly; SameSite=Lax; Secure`;
+  return `${SESSION_COOKIE_NAME}=${encodeURIComponent(token)}; Max-Age=${safeMaxAge}; Path=/; HttpOnly; SameSite=Lax`;
 }
 
 export function clearSessionCookie(): string {
-  return `${SESSION_COOKIE_NAME}=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; SameSite=Lax; Secure`;
+  return `${SESSION_COOKIE_NAME}=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; SameSite=Lax`;
 }
 
 export function parseSessionToken(cookieHeader: string | null): string | null {
