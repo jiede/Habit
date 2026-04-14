@@ -3,17 +3,12 @@
 A lightweight web app for logging daily habits and weekly reviews. The production architecture uses **Cloudflare Pages + Functions + D1** with email/password auth (see design spec below). Local `npm run dev` serves the UI; API routes run when you use `wrangler pages dev` or deploy to Cloudflare.
 
 ## 1.Daily Record
-<img width="883" height="623" alt="image" src="https://github.com/user-attachments/assets/464a7739-bd4b-45e1-aef3-4903651adb21" />
 
 ## 2.Weekly Statistics
-<img width="847" height="756" alt="image" src="https://github.com/user-attachments/assets/13c25c02-632e-4113-a1ac-7f04e1d67a11" />
 
 ## 3.History
-<img width="861" height="453" alt="image" src="https://github.com/user-attachments/assets/bad4a35a-1d5d-417d-b97c-6653a8bc4f3e" />
 
 ## 4.Add Habit
-<img width="839" height="563" alt="image" src="https://github.com/user-attachments/assets/f06dc1ab-975b-41aa-a3b6-1ecdbb308d76" />
-
 
 ## Commands
 
@@ -50,3 +45,62 @@ npm run preview
 5. Deploy Pages project pointing at this repo; configure Functions + D1 binding `DB` to the same database.
 
 Details: [migration plan](docs/superpowers/plans/2026-04-14-cloudflare-d1-migration-plan.md).
+
+## 本地完整流程测试（推荐）
+
+前端里的接口路径是 **`/api/*`**。只用 `npm run dev`（Vite）时，**没有** Cloudflare Functions，注册/登录会失败。要测完整链路，请用 **Wrangler 在本地跑构建产物 + D1**：
+
+1. **准备环境变量（不要提交）**
+
+   ```bash
+   cp .dev.vars.example .dev.vars
+   ```
+
+   编辑 `.dev.vars`：把 `SESSION_SECRET` 换成至少 32 字节的随机字符串；`COOKIE_DOMAIN` 一般保持 `localhost` 即可。
+
+2. **初始化本地 D1（只需一次或 schema 变更后）**
+
+   ```bash
+   npx wrangler d1 migrations apply habit-db --local
+   ```
+
+3. **构建前端**
+
+   ```bash
+   npm run build
+   ```
+
+4. **启动 Pages + Functions + 本地 D1**
+
+   ```bash
+   npx wrangler pages dev dist --local
+   ```
+
+   终端里会打印本地 URL（常见为 `http://127.0.0.1:8788`）。用浏览器打开该地址。
+
+5. **按产品流程自测**
+
+   - 注册账号 → 登录  
+   - 「习惯」里新增 / 归档 / 排序  
+   - 「今日」里打卡与文字保存  
+   - 「本周」里查看汇总并填写周分与周记  
+   - 「统计」里能看到周列表  
+
+6. **仅跑单元测试（不启动 Cloudflare）**
+
+   ```bash
+   npm run test:run
+   ```
+
+## 文档在哪里？
+
+设计说明与实施计划在仓库的 **`docs/superpowers/`** 下（已纳入 git）：
+
+| 文件 | 说明 |
+|------|------|
+| `docs/superpowers/specs/2026-04-14-cloudflare-d1-daily-tracker-design.md` | 当前架构（Cloudflare + D1 + 登录） |
+| `docs/superpowers/plans/2026-04-14-cloudflare-d1-migration-plan.md` | 迁移与实现任务拆解 |
+| `docs/superpowers/specs/2026-04-11-daily-life-tracker-design.md` | 早期仅 IndexedDB 方案（历史） |
+| `docs/superpowers/plans/2026-04-11-daily-life-tracker.md` | 早期实现计划（历史） |
+
+若在 GitHub 网页上看不到：请确认 **`main` 已 push**（本地可能超前于远端）。在 Cursor 左侧文件树请展开 **`docs`** 文件夹（默认不会把 `docs` 放在根目录以外）。
