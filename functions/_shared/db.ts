@@ -2,7 +2,7 @@ interface D1PreparedStatement {
   bind(...values: unknown[]): D1PreparedStatement;
   first<T = Record<string, unknown>>(): Promise<T | null>;
   all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
-  run(): Promise<{ success: boolean }>;
+  run(): Promise<{ success: boolean; changes?: number }>;
 }
 
 export interface D1Database {
@@ -11,6 +11,19 @@ export interface D1Database {
 
 export interface BindingsWithDb {
   DB: D1Database;
+}
+
+export interface DbSession {
+  id: string;
+  user_id: string;
+  expires_at: number;
+}
+
+export interface DbUser {
+  id: string;
+  email: string;
+  password_hash: string;
+  created_at: number;
 }
 
 export function getDb(bindings: BindingsWithDb): D1Database {

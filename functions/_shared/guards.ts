@@ -32,7 +32,11 @@ export function requirePathPart(value: string | undefined, name: string): string
   if (!value || !value.trim()) {
     throw new HttpError(400, `Invalid ${name}`);
   }
-  return value.trim();
+  const trimmed = value.trim();
+  if (trimmed.includes("/")) {
+    throw new HttpError(400, `Invalid ${name}`);
+  }
+  return trimmed;
 }
 
 export function requirePathParam(value: string | undefined, name: string): string {

@@ -6,7 +6,7 @@ it("parseCookie extracts `session`", () => {
 });
 
 it("buildSessionCookie includes HttpOnly and session token", () => {
-  const cookie = buildSessionCookie("token", 3600);
-  expect(cookie).toContain("HttpOnly");
-  expect(cookie).toContain("session=token");
+  const c = buildSessionCookie("token", 3600);
+  expect(c).toContain("HttpOnly");
+  expect(c).toContain("session=token");
 });
