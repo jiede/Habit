@@ -35,6 +35,10 @@ export function requirePathPart(value: string | undefined, name: string): string
   return value.trim();
 }
 
+export function requirePathParam(value: string | undefined, name: string): string {
+  return requirePathPart(value, name);
+}
+
 export async function requireJsonBody<T>(request: Request): Promise<T> {
   const contentType = request.headers.get("content-type") ?? "";
   if (!contentType.toLowerCase().includes("application/json")) {

@@ -2,6 +2,9 @@ const HASH_ITERATIONS = 210_000;
 const HASH_BYTES = 32;
 const SALT_BYTES = 16;
 const SESSION_COOKIE_NAME = "session";
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 256;
 
 const encoder = new TextEncoder();
 
@@ -69,7 +72,7 @@ export function newSessionToken(): string {
   return toHex(bytes);
 }
 
-export function parseCookie(cookieHeader: string | null): Record<string, string> {
+export function parseCookie(cookieHeader: string | null | undefined): Record<string, string> {
   if (!cookieHeader) return {};
   const parsed: Record<string, string> = {};
 
@@ -95,4 +98,24 @@ export function buildSessionCookie(token: string, maxAgeSec: number): string {
 
 export function clearSessionCookie(): string {
   return `${SESSION_COOKIE_NAME}=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Path=/; SameSite=Lax; Secure`;
+}
+
+export function parseSessionToken(cookieHeader: string | null | undefined): string | null {
+  return parseCookie(cookieHeader)[SESSION_COOKIE_NAME] ?? null;
+}
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+export function isValidEmail(email: string): boolean {
+  return EMAIL_PATTERN.test(normalizeEmail(email));
+}
+
+export function isValidPassword(password: string): boolean {
+  return (
+    typeof password === "string" &&
+    password.length >= MIN_PASSWORD_LENGTH &&
+    password.length <= MAX_PASSWORD_LENGTH
+  );
 }
