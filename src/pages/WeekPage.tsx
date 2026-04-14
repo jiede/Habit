@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { db } from "../db/database";
 import type { DailyEntry, Habit, WeeklyEntry } from "../db/types";
 import { summarizeNumericWeek, summarizeToggleWeek } from "../lib/aggregate";
 import { useToast } from "../hooks/useToast";
+import { apiGet, apiPut } from "../lib/api";
 import { debounce } from "../lib/debounce";
 import {
   dateFromWeekKey,
@@ -25,27 +25,25 @@ export default function WeekPage() {
   const [weekly, setWeekly] = useState<WeeklyEntry | null>(null);
 
   async function load() {
-    const [hs, ws] = await Promise.all([
-      db.habits.toArray(),
-      db.weeklyEntries.get(weekKey),
+    const [habitData, weeklyData, dailyEntries] = await Promise.all([
+      apiGet<{ habits: Habit[] }>("/api/habits"),
+      apiGet<{ entry: WeeklyEntry }>(`/api/weekly/${weekKey}`),
+      Promise.all(keys.map((dateKey) => apiGet<{ entry: DailyEntry }>(`/api/daily/${dateKey}`))),
     ]);
-    setHabits(hs);
-    const entries = await db.dailyEntries.bulkGet(keys);
-    setDays(entries.filter((e): e is DailyEntry => !!e));
-    setWeekly(
-      ws ?? {
-        weekKey,
-        score: null,
-        weekReview: "",
-        nextWeekPlan: "",
-        updatedAt: Date.now(),
-      },
-    );
+    setHabits(habitData.habits);
+    setDays(dailyEntries.map((data) => data.entry));
+    setWeekly(weeklyData.entry);
   }
 
   useEffect(() => {
-    void load();
-  }, [weekKey]);
+    void (async () => {
+      try {
+        await load();
+      } catch {
+        show("加载失败，请稍后重试");
+      }
+    })();
+  }, [weekKey, show]);
 
   const habitById = useMemo(() => new Map(habits.map((h) => [h.id, h])), [habits]);
 
@@ -73,7 +71,11 @@ export default function WeekPage() {
       debounce((row: WeeklyEntry) => {
         void (async () => {
           try {
-            await db.weeklyEntries.put({ ...row, updatedAt: Date.now() });
+            await apiPut<{ entry: WeeklyEntry }>(`/api/weekly/${row.weekKey}`, {
+              score: row.score,
+              weekReview: row.weekReview,
+              nextWeekPlan: row.nextWeekPlan,
+            });
           } catch {
             show("保存失败，请稍后重试");
           }
@@ -111,7 +113,7 @@ export default function WeekPage() {
           const label = h?.name ?? "未知习惯（可能已删档）";
           if (
             h?.type === "numeric" ||
-            (!h && Object.values(dayMap).some((d) => typeof d.habitValues[id] === "number"))
+            (!h && days.some((d) => typeof d.habitValues[id] === "number"))
           ) {
             const s = summarizeNumericWeek(keys, (k) => {
               const v = dayMap.get(k)?.habitValues[id];

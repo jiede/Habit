@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { db } from "../db/database";
 import type { DailyEntry, Habit } from "../db/types";
 import { useToast } from "../hooks/useToast";
+import { apiGet, apiPut } from "../lib/api";
 import { debounce } from "../lib/debounce";
 import { parseDateKeyLocal, toDateKey } from "../lib/dates";
 
@@ -27,28 +27,33 @@ export default function TodayPage() {
 
   useEffect(() => {
     void (async () => {
-      const hs = await db.habits.filter((h) => h.archivedAt === null).sortBy("sortOrder");
-      setHabits(hs);
-      let row = await db.dailyEntries.get(dateKey);
-      if (!row) {
-        row = {
-          dateKey,
-          habitValues: {},
-          todayReview: "",
-          tomorrowPlan: "",
-          updatedAt: Date.now(),
-        };
+      try {
+        const [habitData, dailyData] = await Promise.all([
+          apiGet<{ habits: Habit[] }>("/api/habits"),
+          apiGet<{ entry: DailyEntry }>(`/api/daily/${dateKey}`),
+        ]);
+        setHabits(
+          habitData.habits
+            .filter((h) => h.archivedAt === null)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+        );
+        setEntry(dailyData.entry);
+      } catch {
+        show("加载失败，请稍后重试");
       }
-      setEntry(row);
     })();
-  }, [dateKey]);
+  }, [dateKey, show]);
 
   const persist = useMemo(
     () =>
       debounce((next: DailyEntry) => {
         void (async () => {
           try {
-            await db.dailyEntries.put({ ...next, updatedAt: Date.now() });
+            await apiPut<{ entry: DailyEntry }>(`/api/daily/${next.dateKey}`, {
+              habitValues: next.habitValues,
+              todayReview: next.todayReview,
+              tomorrowPlan: next.tomorrowPlan,
+            });
           } catch {
             show("保存失败，请稍后重试");
           }
