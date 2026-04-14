@@ -55,18 +55,21 @@
 ### 3.1 表结构
 
 #### `users`
+
 - `id` TEXT PRIMARY KEY（UUID）
 - `email` TEXT UNIQUE NOT NULL
 - `password_hash` TEXT NOT NULL
 - `created_at` INTEGER NOT NULL
 
 #### `sessions`
+
 - `id` TEXT PRIMARY KEY（随机 token）
 - `user_id` TEXT NOT NULL
 - `expires_at` INTEGER NOT NULL
 - `created_at` INTEGER NOT NULL
 
 #### `habits`
+
 - `id` TEXT PRIMARY KEY
 - `user_id` TEXT NOT NULL
 - `name` TEXT NOT NULL
@@ -77,6 +80,7 @@
 - `created_at` INTEGER NOT NULL
 
 #### `daily_entries`
+
 - `user_id` TEXT NOT NULL
 - `date_key` TEXT NOT NULL（`YYYY-MM-DD`）
 - `habit_values_json` TEXT NOT NULL
@@ -86,6 +90,7 @@
 - PRIMARY KEY (`user_id`, `date_key`)
 
 #### `weekly_entries`
+
 - `user_id` TEXT NOT NULL
 - `week_key` TEXT NOT NULL（如 `2026-W15`）
 - `score` REAL NULL
@@ -116,13 +121,10 @@
 - `GET /api/habits`
 - `POST /api/habits`
 - `PATCH /api/habits/:id`
-
 - `GET /api/daily/:dateKey`
 - `PUT /api/daily/:dateKey`
-
 - `GET /api/weekly/:weekKey`
 - `PUT /api/weekly/:weekKey`
-
 - `GET /api/stats/weeks`
 
 ### 4.3 鉴权与权限
@@ -185,6 +187,7 @@
 
 ## 8. 变更记录
 
-| 日期 | 说明 |
-|------|------|
+
+| 日期         | 说明                                       |
+| ---------- | ---------------------------------------- |
 | 2026-04-14 | 新增 Cloudflare 一体化方案，替代 IndexedDB 本地持久化方案 |
