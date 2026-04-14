@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { db } from "../db/database";
 import type { Habit, HabitType } from "../db/types";
+import { apiGet, apiPatch, apiPost } from "../lib/api";
 
 function sortActive(a: Habit, b: Habit) {
   return a.sortOrder - b.sortOrder;
@@ -11,14 +11,21 @@ export default function HabitsPage() {
   const [name, setName] = useState("");
   const [type, setType] = useState<HabitType>("toggle");
   const [unit, setUnit] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   async function refresh() {
-    const rows = await db.habits.orderBy("sortOrder").toArray();
-    setHabits(rows);
+    const data = await apiGet<{ habits: Habit[] }>("/api/habits");
+    setHabits(data.habits);
   }
 
   useEffect(() => {
-    void refresh();
+    void (async () => {
+      try {
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "加载习惯失败");
+      }
+    })();
   }, []);
 
   const { active, archived } = useMemo(() => {
@@ -30,28 +37,31 @@ export default function HabitsPage() {
   async function addHabit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    const last = await db.habits.orderBy("sortOrder").last();
-    const max = last?.sortOrder ?? 0;
-    const habit: Habit = {
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      type,
-      unit: type === "numeric" && unit.trim() ? unit.trim() : null,
-      sortOrder: max + 1,
-      archivedAt: null,
-      createdAt: Date.now(),
-    };
-    await db.habits.add(habit);
-    setName("");
-    setUnit("");
-    await refresh();
+    try {
+      await apiPost<{ habit: Habit }>("/api/habits", {
+        name: name.trim(),
+        type,
+        unit: type === "numeric" ? unit : null,
+      });
+      setName("");
+      setUnit("");
+      setError(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "添加习惯失败");
+    }
   }
 
   async function archive(id: string) {
-    const h = await db.habits.get(id);
-    if (!h) return;
-    await db.habits.update(id, { archivedAt: Date.now() });
-    await refresh();
+    try {
+      await apiPatch<{ habit: Habit }>(`/api/habits/${id}`, {
+        archivedAt: Date.now(),
+      });
+      setError(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "归档习惯失败");
+    }
   }
 
   async function move(id: string, dir: -1 | 1) {
@@ -60,11 +70,20 @@ export default function HabitsPage() {
     if (idx < 0 || swapIdx < 0 || swapIdx >= active.length) return;
     const a = active[idx]!;
     const b = active[swapIdx]!;
-    await db.transaction("rw", db.habits, async () => {
-      await db.habits.update(a.id, { sortOrder: b.sortOrder });
-      await db.habits.update(b.id, { sortOrder: a.sortOrder });
-    });
-    await refresh();
+    try {
+      await Promise.all([
+        apiPatch<{ habit: Habit }>(`/api/habits/${a.id}`, {
+          sortOrder: b.sortOrder,
+        }),
+        apiPatch<{ habit: Habit }>(`/api/habits/${b.id}`, {
+          sortOrder: a.sortOrder,
+        }),
+      ]);
+      setError(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "调整顺序失败");
+    }
   }
 
   return (
@@ -91,6 +110,7 @@ export default function HabitsPage() {
         <button type="submit">添加</button>
       </form>
       <h2>进行中</h2>
+      {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
       {active.length === 0 ? <p>还没有习惯，先添加一个。</p> : null}
       <ul>
         {active.map((h) => (
