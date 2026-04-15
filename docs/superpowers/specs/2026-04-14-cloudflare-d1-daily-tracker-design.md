@@ -38,7 +38,7 @@
 
 - **前端：** 现有 `Vite + React + TypeScript`
 - **托管：** Cloudflare Pages
-- **后端：** Cloudflare Workers（`/api/*`）
+- **后端：** Cloudflare Workers（`/api/`*）
 - **数据库：** Cloudflare D1
 - **会话：** Worker 侧 session + HttpOnly Cookie
 

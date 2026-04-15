@@ -83,7 +83,7 @@ export default function TodayPage() {
   if (!entry) return <p>加载中…</p>;
 
   return (
-    <section className="page">
+    <section className="page compact">
       <h1>今日</h1>
       <div className="surface section-block" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
         <button type="button" className="ghost" onClick={() => shiftDay(-1)}>

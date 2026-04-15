@@ -22,9 +22,9 @@
 
 **步骤：**
 
-- [ ] 从 `StatsPage` 抽出周活动格 UI 到 `WeekDayGrid`
-- [ ] 组件支持 `dayFlags`、`compact`、`currentDayIndex` 参数
-- [ ] `StatsPage` 接入新组件并保持当前视觉不回退
+- 从 `StatsPage` 抽出周活动格 UI 到 `WeekDayGrid`
+- 组件支持 `dayFlags`、`compact`、`currentDayIndex` 参数
+- `StatsPage` 接入新组件并保持当前视觉不回退
 
 **验收标准：**
 
@@ -42,13 +42,13 @@
 
 **步骤：**
 
-- [ ] 新增 `summarizeWeekActivity(...)`，输出：
+- 新增 `summarizeWeekActivity(...)`，输出：
   - `dayFlags: boolean[7]`
   - `recordedDays: number`
-- [ ] 复用与统计页一致口径：
+- 复用与统计页一致口径：
   - `toggle === true` 计入
   - `numeric` 为有效数字（含 `0`）计入
-- [ ] 覆盖异常/空值兜底逻辑
+- 覆盖异常/空值兜底逻辑
 
 **验收标准：**
 
@@ -65,12 +65,12 @@
 
 **步骤：**
 
-- [ ] 基于已加载 `days` + `keys` 计算 `dayFlags`、`recordedDays`
-- [ ] 在「本周习惯概览」标题下方插入摘要块：
+- 基于已加载 `days` + `keys` 计算 `dayFlags`、`recordedDays`
+- 在「本周习惯概览」标题下方插入摘要块：
   - 标题：`本周活动`
   - 文案：`${recordedDays} / 7 天有记录`
   - 迷你活动格：`<WeekDayGrid compact ... />`
-- [ ] 当前日使用轻量描边（可选）
+- 当前日使用轻量描边（可选）
 
 **验收标准：**
 
@@ -88,11 +88,11 @@
 
 **步骤：**
 
-- [ ] 定位开关摘要文案输出逻辑
-- [ ] 将文案从：
+- 定位开关摘要文案输出逻辑
+- 将文案从：
   - `完成 X 天，未完成 Y 天，未记录 Z 天`
   - 调整为：`完成 X 天`
-- [ ] 数值型习惯文案保持现状不变
+- 数值型习惯文案保持现状不变
 
 **验收标准：**
 
@@ -110,9 +110,9 @@
 
 **步骤：**
 
-- [ ] 运行单测：`npm run test:run`
-- [ ] 运行构建：`npm run build`
-- [ ] 手工验证：
+- 运行单测：`npm run test:run`
+- 运行构建：`npm run build`
+- 手工验证：
   - Week 页新增摘要显示正确
   - Week 页开关文案正确
   - Stats 页活动格无视觉回退

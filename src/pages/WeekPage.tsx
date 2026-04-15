@@ -109,7 +109,7 @@ export default function WeekPage() {
   if (!weekly) return <p>加载中…</p>;
 
   return (
-    <section className="page">
+    <section className="page compact">
       <h1>
         {banner.shortLabel}（{banner.rangeZh}）
       </h1>
