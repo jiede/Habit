@@ -26,6 +26,11 @@ export type NumericWeekSummary = {
   average?: number;
 };
 
+export type WeekActivitySummary = {
+  dayFlags: boolean[];
+  recordedDays: number;
+};
+
 export function summarizeNumericWeek(
   weekDateKeys: string[],
   get: (dateKey: string) => number | null,
@@ -42,4 +47,20 @@ export function summarizeNumericWeek(
   const average =
     daysWithValue > 0 ? sum / daysWithValue : undefined;
   return { sum, daysWithValue, average };
+}
+
+function hasAnyHabitRecord(habitValues: Record<string, boolean | number | null> | undefined): boolean {
+  if (!habitValues) return false;
+  return Object.values(habitValues).some((value) => value === true || (typeof value === "number" && Number.isFinite(value)));
+}
+
+export function summarizeWeekActivity(
+  weekDateKeys: string[],
+  getHabitValues: (dateKey: string) => Record<string, boolean | number | null> | undefined,
+): WeekActivitySummary {
+  const dayFlags = weekDateKeys.map((k) => hasAnyHabitRecord(getHabitValues(k)));
+  return {
+    dayFlags,
+    recordedDays: dayFlags.filter(Boolean).length,
+  };
 }

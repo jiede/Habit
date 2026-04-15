@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { summarizeToggleWeek, summarizeNumericWeek } from "../aggregate";
+import { summarizeNumericWeek, summarizeToggleWeek, summarizeWeekActivity } from "../aggregate";
 
 describe("summarizeToggleWeek", () => {
   it("counts only days with entry and true; ignores missing days", () => {
@@ -36,5 +36,50 @@ describe("summarizeNumericWeek", () => {
     expect(r.sum).toBe(0);
     expect(r.daysWithValue).toBe(0);
     expect(r.average).toBeUndefined();
+  });
+});
+
+describe("summarizeWeekActivity", () => {
+  it("counts toggle true as recorded", () => {
+    const weekKeys = ["2026-04-06"];
+    const byDay = {
+      "2026-04-06": { toggleHabit: true },
+    };
+    const r = summarizeWeekActivity(weekKeys, (k) => byDay[k as keyof typeof byDay]);
+    expect(r.dayFlags).toEqual([true]);
+    expect(r.recordedDays).toBe(1);
+  });
+
+  it("counts numeric zero as recorded", () => {
+    const weekKeys = ["2026-04-06"];
+    const byDay = {
+      "2026-04-06": { numericHabit: 0 },
+    };
+    const r = summarizeWeekActivity(weekKeys, (k) => byDay[k as keyof typeof byDay]);
+    expect(r.dayFlags).toEqual([true]);
+    expect(r.recordedDays).toBe(1);
+  });
+
+  it("does not count false/null values", () => {
+    const weekKeys = ["2026-04-06", "2026-04-07"];
+    const byDay = {
+      "2026-04-06": { toggleHabit: false },
+      "2026-04-07": { numericHabit: null },
+    };
+    const r = summarizeWeekActivity(weekKeys, (k) => byDay[k as keyof typeof byDay]);
+    expect(r.dayFlags).toEqual([false, false]);
+    expect(r.recordedDays).toBe(0);
+  });
+
+  it("recordedDays matches dayFlags true count", () => {
+    const weekKeys = ["2026-04-06", "2026-04-07", "2026-04-08"];
+    const byDay = {
+      "2026-04-06": { a: true },
+      "2026-04-07": { b: 1 },
+      "2026-04-08": { c: null },
+    };
+    const r = summarizeWeekActivity(weekKeys, (k) => byDay[k as keyof typeof byDay]);
+    expect(r.dayFlags).toEqual([true, true, false]);
+    expect(r.recordedDays).toBe(r.dayFlags.filter(Boolean).length);
   });
 });

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { WeekDayGrid } from "../components/stats/WeekDayGrid";
 import type { DailyEntry, Habit, WeeklyEntry } from "../db/types";
-import { summarizeNumericWeek, summarizeToggleWeek } from "../lib/aggregate";
+import { summarizeNumericWeek, summarizeToggleWeek, summarizeWeekActivity } from "../lib/aggregate";
 import { useToast } from "../hooks/useToast";
 import { apiGet, apiPut } from "../lib/api";
 import { debounce } from "../lib/debounce";
@@ -66,6 +67,15 @@ export default function WeekPage() {
     return [...ids];
   }, [habits, keys, dayMap]);
 
+  const weekActivity = useMemo(
+    () =>
+      summarizeWeekActivity(keys, (k) => {
+        return dayMap.get(k)?.habitValues;
+      }),
+    [keys, dayMap],
+  );
+  const currentDayIndex = ((new Date().getDay() + 6) % 7) as number; // Monday=0 ... Sunday=6
+
   const persistWeekly = useMemo(
     () =>
       debounce((row: WeeklyEntry) => {
@@ -106,6 +116,20 @@ export default function WeekPage() {
       <p style={{ color: "#666" }}>周键：{banner.weekKey}</p>
       <Link to="/stats">← 返回统计</Link>
       <h2>本周习惯概览</h2>
+      <div
+        style={{
+          border: "1px solid #e5e7eb",
+          borderRadius: 10,
+          padding: "10px 12px",
+          marginBottom: 10,
+          background: "#fcfcfd",
+          maxWidth: 340,
+        }}
+      >
+        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>本周活动</div>
+        <div style={{ fontSize: 13, color: "#0f766e", marginBottom: 8 }}>{weekActivity.recordedDays} / 7 天有记录</div>
+        <WeekDayGrid dayFlags={weekActivity.dayFlags} compact currentDayIndex={currentDayIndex} />
+      </div>
       {relevantHabitIds.length === 0 ? <p>本周暂无记录。</p> : null}
       <ul>
         {relevantHabitIds.map((id) => {
@@ -137,8 +161,7 @@ export default function WeekPage() {
           });
           return (
             <li key={id}>
-              <strong>{label}</strong>：完成 {s.doneDays} 天，未完成 {s.falseDays} 天，未记录{" "}
-              {s.unrecordedDays} 天
+              <strong>{label}</strong>：完成 {s.doneDays} 天
             </li>
           );
         })}
