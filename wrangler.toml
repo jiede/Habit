@@ -4,5 +4,5 @@ pages_build_output_dir = "dist"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "habit-db"
-database_id = "__SET_IN_CLOUDFLARE__"
+database_name = "habit"
+database_id = "2f9eacd8-8c01-4fd0-b024-1ae1a3b25115"
