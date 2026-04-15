@@ -46,6 +46,33 @@ npm run preview
 
 Details: [migration plan](docs/superpowers/plans/2026-04-14-cloudflare-d1-migration-plan.md).
 
+### Cloudflare Pages：构建成功但 deploy 失败
+
+若日志里在 `npm run build` 成功之后还执行了 **`npx wrangler deploy`**，会出现：
+
+- `Missing entry-point to Worker script or to assets directory`
+- 或提示应使用 **`wrangler pages deploy`**
+
+**原因：** `wrangler deploy` 用于「独立 Worker」项目；本项目是 **Pages（静态 `dist` + `functions/`）**，不能用它当 Pages 的发布步骤。
+
+**在 Cloudflare Dashboard 里改法（推荐）：**
+
+1. 打开该 Pages 项目 → **Settings** → **Builds & deployments**。
+2. **Build command** 保持：`npm run build`（或 `npm ci && npm run build`）。
+3. **Build output directory** 填：`dist`。
+4. **Deploy command**（或「自定义 deploy 命令」一类字段）**留空 / 删除**。  
+   Git 集成的 Pages 会在构建完成后 **自动上传 `dist`**，并带上仓库里的 **`functions/`**，无需再跑 `wrangler deploy`。
+5. 在同一项目的 **Functions** 绑定里把 **D1** 绑定名为 `DB` 的数据库（与 `wrangler.toml` 里 `binding = "DB"` 一致），并在该环境下配置 **Secrets**（如 `SESSION_SECRET`）。
+
+**若你坚持用命令行发布（CI 或本机）：** 使用 Pages 专用命令，例如：
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name=你的Pages项目名
+```
+
+（需在环境里配置 `CLOUDFLARE_API_TOKEN` 等，详见 Wrangler 文档。）
+
 ## 本地完整流程测试（推荐）
 
 前端里的接口路径是 **`/api/*`**。只用 `npm run dev`（Vite）时，**没有** Cloudflare Functions，注册/登录会失败。要测完整链路，请用 **Wrangler 在本地跑构建产物 + D1**：
