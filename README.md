@@ -3,12 +3,17 @@
 A lightweight web app for logging daily habits and weekly reviews. The production architecture uses **Cloudflare Pages + Functions + D1** with email/password auth (see design spec below). Local `npm run dev` serves the UI; API routes run when you use `wrangler pages dev` or deploy to Cloudflare.
 
 ## 1.Daily Record
+<img width="803" height="518" alt="image" src="https://github.com/user-attachments/assets/e932466a-802f-4562-b5bf-e4360ef59891" />
+
 
 ## 2.Weekly Statistics
+<img width="829" height="704" alt="image" src="https://github.com/user-attachments/assets/f0ea3f68-4c1d-48fe-a0ec-4d45cfb45069" />
 
 ## 3.History
+<img width="623" height="262" alt="image" src="https://github.com/user-attachments/assets/1d93fb42-f8b0-43f9-bc30-3fffc279b4ab" />
 
 ## 4.Add Habit
+<img width="629" height="540" alt="image" src="https://github.com/user-attachments/assets/68e3f5e5-baaa-4a38-a032-2aed24f9c33c" />
 
 ## Commands
 
