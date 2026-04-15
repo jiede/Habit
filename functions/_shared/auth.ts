@@ -1,5 +1,6 @@
 const HASH_PREFIX = "pbkdf2";
-const HASH_ITERATIONS = 210_000;
+const HASH_ITERATIONS = 100_000;
+const HASH_ITERATIONS_MAX = 100_000;
 const HASH_BYTES = 32;
 const SALT_BYTES = 16;
 const SESSION_COOKIE_NAME = "session";
@@ -59,7 +60,7 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   if (algo !== HASH_PREFIX || !roundsRaw || !saltB64 || !digestB64) return false;
 
   const rounds = Number.parseInt(roundsRaw, 10);
-  if (!Number.isInteger(rounds) || rounds <= 0) return false;
+  if (!Number.isInteger(rounds) || rounds <= 0 || rounds > HASH_ITERATIONS_MAX) return false;
 
   try {
     const salt = fromBase64Url(saltB64);
