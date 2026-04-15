@@ -34,7 +34,7 @@ export default function App() {
 
   if (checkingSession) {
     return (
-      <main style={{ padding: "1rem", maxWidth: 720, margin: "0 auto" }}>
+      <main className="app-main">
         <p>加载中…</p>
       </main>
     );
@@ -52,7 +52,7 @@ export default function App() {
           path="*"
           element={
             me ? (
-              <main style={{ padding: "1rem", maxWidth: 720, margin: "0 auto" }}>
+              <main className="app-main">
                 <Routes>
                   <Route path="/" element={<TodayPage />} />
                   <Route path="/week" element={<CurrentWeekRedirect />} />

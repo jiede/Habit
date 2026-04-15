@@ -1,10 +1,7 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, type NavLinkRenderProps } from "react-router-dom";
 import { logout } from "../lib/session";
 
-const linkStyle = ({ isActive }: { isActive: boolean }) => ({
-  fontWeight: isActive ? 700 : 400,
-  marginRight: "1rem",
-});
+const navLinkClass = ({ isActive }: NavLinkRenderProps) => `nav-link${isActive ? " is-active" : ""}`;
 
 interface NavBarProps {
   onLogout: () => void;
@@ -20,29 +17,22 @@ export default function NavBar({ onLogout }: NavBarProps) {
   }
 
   return (
-    <nav
-      style={{
-        padding: "0.75rem 1rem",
-        borderBottom: "1px solid #ddd",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
+    <nav className="app-nav">
       <div>
-        <NavLink to="/" end style={linkStyle}>
+        <NavLink to="/" end className={navLinkClass}>
           今日
         </NavLink>
-        <NavLink to="/week" style={linkStyle}>
+        <NavLink to="/week" className={navLinkClass}>
           本周
         </NavLink>
-        <NavLink to="/stats" style={linkStyle}>
+        <NavLink to="/stats" className={navLinkClass}>
           统计
         </NavLink>
-        <NavLink to="/habits" style={linkStyle}>
+        <NavLink to="/habits" className={navLinkClass}>
           习惯
         </NavLink>
       </div>
-      <button type="button" onClick={() => void handleLogout()} style={{ marginLeft: "auto" }}>
+      <button type="button" onClick={() => void handleLogout()} className="logout-btn ghost">
         退出登录
       </button>
     </nav>

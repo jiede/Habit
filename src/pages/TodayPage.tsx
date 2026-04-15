@@ -83,18 +83,19 @@ export default function TodayPage() {
   if (!entry) return <p>加载中…</p>;
 
   return (
-    <section>
+    <section className="page">
       <h1>今日</h1>
-      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-        <button type="button" onClick={() => shiftDay(-1)}>
+      <div className="surface section-block" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <button type="button" className="ghost" onClick={() => shiftDay(-1)}>
           ← 前一天
         </button>
-        <span>{dateKey}</span>
-        <button type="button" onClick={() => shiftDay(1)}>
+        <span className="muted">{dateKey}</span>
+        <button type="button" className="ghost" onClick={() => shiftDay(1)}>
           后一天 →
         </button>
         <button
           type="button"
+          className="ghost"
           onClick={() => {
             const nk = toDateKey(new Date());
             setDateKey(nk);
@@ -105,13 +106,13 @@ export default function TodayPage() {
         </button>
       </div>
       {habits.length === 0 ? <p>请先在「习惯」里添加习惯。</p> : null}
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <ul style={{ listStyle: "none", padding: 0, marginTop: 8 }}>
         {habits.map((h) => {
           const v = entry.habitValues[h.id];
           if (h.type === "toggle") {
             const checked = v === true;
             return (
-              <li key={h.id} style={{ margin: "0.5rem 0" }}>
+              <li key={h.id} className="surface soft section-block" style={{ margin: "0.5rem 0" }}>
                 <label>
                   <input
                     type="checkbox"
@@ -131,7 +132,7 @@ export default function TodayPage() {
           }
           const num = typeof v === "number" ? String(v) : "";
           return (
-            <li key={h.id} style={{ margin: "0.5rem 0" }}>
+            <li key={h.id} className="surface soft section-block" style={{ margin: "0.5rem 0" }}>
               <label>
                 {h.name}
                 <input
@@ -152,7 +153,7 @@ export default function TodayPage() {
           );
         })}
       </ul>
-      <label style={{ display: "block", marginTop: "1rem" }}>
+      <label className="surface section-block" style={{ display: "block", marginTop: "1rem" }}>
         今日回顾
         <textarea
           style={{ width: "100%", minHeight: 80 }}
@@ -160,7 +161,7 @@ export default function TodayPage() {
           onChange={(e) => updateEntry({ todayReview: e.target.value })}
         />
       </label>
-      <label style={{ display: "block", marginTop: "0.5rem" }}>
+      <label className="surface section-block" style={{ display: "block", marginTop: "0.5rem" }}>
         明日改进
         <textarea
           style={{ width: "100%", minHeight: 80 }}

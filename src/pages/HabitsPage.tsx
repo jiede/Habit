@@ -87,9 +87,9 @@ export default function HabitsPage() {
   }
 
   return (
-    <section>
+    <section className="page">
       <h1>习惯</h1>
-      <form onSubmit={addHabit} style={{ display: "grid", gap: "0.5rem", maxWidth: 360 }}>
+      <form onSubmit={addHabit} className="surface section-block stack" style={{ maxWidth: 420 }}>
         <label>
           名称
           <input value={name} onChange={(e) => setName(e.target.value)} required />
@@ -110,19 +110,19 @@ export default function HabitsPage() {
         <button type="submit">添加</button>
       </form>
       <h2>进行中</h2>
-      {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
+      {error ? <p className="error-text">{error}</p> : null}
       {active.length === 0 ? <p>还没有习惯，先添加一个。</p> : null}
-      <ul>
+      <ul style={{ paddingLeft: 0, listStyle: "none" }}>
         {active.map((h) => (
-          <li key={h.id} style={{ marginBottom: "0.5rem" }}>
+          <li key={h.id} className="surface soft section-block" style={{ marginBottom: "0.5rem" }}>
             <strong>{h.name}</strong> — {h.type === "toggle" ? "开关" : `数值${h.unit ? ` (${h.unit})` : ""}`}
-            <button type="button" onClick={() => move(h.id, -1)} style={{ marginLeft: 8 }}>
+            <button type="button" className="ghost" onClick={() => move(h.id, -1)} style={{ marginLeft: 8 }}>
               上移
             </button>
-            <button type="button" onClick={() => move(h.id, 1)}>
+            <button type="button" className="ghost" onClick={() => move(h.id, 1)}>
               下移
             </button>
-            <button type="button" onClick={() => void archive(h.id)} style={{ marginLeft: 8 }}>
+            <button type="button" className="ghost" onClick={() => void archive(h.id)} style={{ marginLeft: 8 }}>
               归档
             </button>
           </li>
@@ -130,9 +130,11 @@ export default function HabitsPage() {
       </ul>
       <h2>已归档</h2>
       {archived.length === 0 ? <p>无</p> : null}
-      <ul>
+      <ul style={{ paddingLeft: 0, listStyle: "none" }}>
         {archived.map((h) => (
-          <li key={h.id}>{h.name}</li>
+          <li key={h.id} className="surface section-block" style={{ marginBottom: 8 }}>
+            {h.name}
+          </li>
         ))}
       </ul>
     </section>

@@ -31,19 +31,17 @@ export default function StatsPage() {
       : currentWeekFlags.filter(Boolean).length;
 
   return (
-    <section style={{ maxWidth: 860 }}>
+    <section className="page" style={{ maxWidth: 860 }}>
       <h1>统计</h1>
       <p>
         <Link to={`/week/${weekKeyISO(new Date())}`}>前往本周</Link>
       </p>
-      {error ? <p style={{ color: "crimson" }}>{error}</p> : null}
+      {error ? <p className="error-text">{error}</p> : null}
       <div
+        className="surface soft"
         style={{
-          border: "1px solid #d1d5db",
-          borderRadius: 12,
           padding: 16,
           marginBottom: 18,
-          background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
@@ -66,14 +64,13 @@ export default function StatsPage() {
               key={r.weekKey}
               style={{
                 marginBottom: 10,
-                border: "1px solid #e5e7eb",
-                borderRadius: 10,
                 padding: "10px 12px",
                 display: "grid",
                 gridTemplateColumns: "1fr auto",
                 columnGap: 12,
                 alignItems: "center",
               }}
+              className="surface soft"
             >
               <div>
                 <Link to={`/week/${r.weekKey}`}>

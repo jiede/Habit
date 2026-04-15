@@ -109,29 +109,20 @@ export default function WeekPage() {
   if (!weekly) return <p>加载中…</p>;
 
   return (
-    <section>
+    <section className="page">
       <h1>
         {banner.shortLabel}（{banner.rangeZh}）
       </h1>
-      <p style={{ color: "#666" }}>周键：{banner.weekKey}</p>
+      <p className="muted">周键：{banner.weekKey}</p>
       <Link to="/stats">← 返回统计</Link>
       <h2>本周习惯概览</h2>
-      <div
-        style={{
-          border: "1px solid #e5e7eb",
-          borderRadius: 10,
-          padding: "10px 12px",
-          marginBottom: 10,
-          background: "#fcfcfd",
-          maxWidth: 340,
-        }}
-      >
+      <div className="surface soft" style={{ padding: "10px 12px", marginBottom: 10, maxWidth: 340 }}>
         <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>本周活动</div>
         <div style={{ fontSize: 13, color: "#0f766e", marginBottom: 8 }}>{weekActivity.recordedDays} / 7 天有记录</div>
         <WeekDayGrid dayFlags={weekActivity.dayFlags} compact currentDayIndex={currentDayIndex} />
       </div>
       {relevantHabitIds.length === 0 ? <p>本周暂无记录。</p> : null}
-      <ul>
+      <ul style={{ listStyle: "none", paddingLeft: 0 }}>
         {relevantHabitIds.map((id) => {
           const h = habitById.get(id);
           const label = h?.name ?? "未知习惯（可能已删档）";
@@ -146,7 +137,7 @@ export default function WeekPage() {
             const unit = h?.unit?.trim();
             const u = unit ? ` ${unit}` : "";
             return (
-              <li key={id}>
+              <li key={id} className="surface soft section-block" style={{ marginBottom: 8 }}>
                 <strong>{label}</strong>：合计 {s.sum}
                 {u}，{s.daysWithValue} 天有记录
                 {s.average !== undefined ? `，日均 ${s.average.toFixed(2)}${u}` : ""}
@@ -160,17 +151,18 @@ export default function WeekPage() {
             return null;
           });
           return (
-            <li key={id}>
+            <li key={id} className="surface soft section-block" style={{ marginBottom: 8 }}>
               <strong>{label}</strong>：完成 {s.doneDays} 天
             </li>
           );
         })}
       </ul>
       <h2>周总结</h2>
-      <label>
+      <label className="surface section-block">
         周总分（手动）
         <input
           type="number"
+          style={{ marginLeft: 8 }}
           value={weekly.score ?? ""}
           onChange={(e) => {
             const raw = e.target.value;
@@ -178,18 +170,18 @@ export default function WeekPage() {
           }}
         />
       </label>
-      <label style={{ display: "block", marginTop: 8 }}>
+      <label className="surface section-block" style={{ display: "block", marginTop: 8 }}>
         周回顾
         <textarea
-          style={{ width: "100%", minHeight: 100 }}
+          style={{ width: "100%", minHeight: 100, marginTop: 6 }}
           value={weekly.weekReview}
           onChange={(e) => updateWeekly({ weekReview: e.target.value })}
         />
       </label>
-      <label style={{ display: "block", marginTop: 8 }}>
+      <label className="surface section-block" style={{ display: "block", marginTop: 8 }}>
         下周计划
         <textarea
-          style={{ width: "100%", minHeight: 100 }}
+          style={{ width: "100%", minHeight: 100, marginTop: 6 }}
           value={weekly.nextWeekPlan}
           onChange={(e) => updateWeekly({ nextWeekPlan: e.target.value })}
         />

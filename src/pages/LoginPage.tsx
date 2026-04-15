@@ -38,7 +38,7 @@ export default function LoginPage({ onAuthenticated }: LoginPageProps) {
   }
 
   return (
-    <section style={{ maxWidth: 420, margin: "2rem auto" }}>
+    <section className="page surface section-block" style={{ maxWidth: 480, margin: "1.4rem auto" }}>
       <h1>{mode === "login" ? "登录" : "注册"}</h1>
       <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
         <label style={{ display: "grid", gap: 4 }}>
@@ -67,6 +67,7 @@ export default function LoginPage({ onAuthenticated }: LoginPageProps) {
       </form>
       <button
         type="button"
+        className="ghost"
         style={{ marginTop: 12 }}
         onClick={() => setMode((prev) => (prev === "login" ? "register" : "login"))}
       >
