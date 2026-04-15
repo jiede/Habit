@@ -26,4 +26,6 @@ export type WeeklyEntry = {
   weekReview: string;
   nextWeekPlan: string;
   updatedAt: number;
+  recordedDays?: number;
+  dayFlags?: boolean[];
 };
