@@ -8,6 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy:pages": "wrangler pages deploy dist",
+    "db:migrate:local": "wrangler d1 migrations apply habit-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply habit-db --remote",
+    "deploy:pages:with-migrations": "npm run build && wrangler d1 migrations apply habit-db --remote && wrangler pages deploy dist",
     "test": "vitest",
     "test:run": "vitest run"
   },
