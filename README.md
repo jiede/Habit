@@ -73,6 +73,34 @@ npx wrangler pages deploy dist --project-name=你的Pages项目名
 
 （需在环境里配置 `CLOUDFLARE_API_TOKEN` 等，详见 Wrangler 文档。）
 
+### Cloudflare Pages：`npx wrangler pages deploy` 报 `Authentication error [code: 10000]`
+
+日志里若出现：
+
+- `Executing user deploy command: npx wrangler pages deploy`
+- `A request to the Cloudflare API .../pages/projects/habit) failed`
+- `Authentication error [code: 10000]`
+- `The API Token is read from the CLOUDFLARE_API_TOKEN environment variable`
+
+说明 **Pages 构建环境里配置了 `CLOUDFLARE_API_TOKEN`**，但该 **Token 权限不足以部署 Pages**（或不是该账号下的有效 Token）。
+
+**推荐做法（与上一节一致，最省事）：**
+
+1. Pages → **Settings** → **Builds & deployments**  
+2. 把 **Deploy command** **清空**（不要执行 `wrangler pages deploy`）。  
+3. 若 **Environment variables** 里仅为 deploy 而设置了 `CLOUDFLARE_API_TOKEN`，可 **删除**（Git 连接的 Pages 默认会用 Cloudflare 自己的集成上传构建产物，一般 **不需要** 在构建里再调 Wrangler 发布）。
+
+**若你必须保留 `wrangler pages deploy`（例如自建 CI）：**
+
+1. 打开 [API Tokens](https://dash.cloudflare.com/profile/api-tokens) → **Create Token**。  
+2. 使用 **「Edit Cloudflare Workers」** 模板，或手动勾选至少包含：  
+   - **Account** → **Cloudflare Pages** → **Edit**  
+   - （若还要管 D1）**Account** → **D1** → **Edit**  
+3. 把新 Token 配到 Pages 的 **Environment variables** 里的 `CLOUDFLARE_API_TOKEN`（**不要**写进仓库）。  
+4. 重新触发部署。
+
+**注意：** 日志里已暴露账号 ID 与项目名；请不要再把 **完整 API Token** 发到聊天或提交到 git。
+
 ## 本地完整流程测试（推荐）
 
 前端里的接口路径是 **`/api/*`**。只用 `npm run dev`（Vite）时，**没有** Cloudflare Functions，注册/登录会失败。要测完整链路，请用 **Wrangler 在本地跑构建产物 + D1**：
